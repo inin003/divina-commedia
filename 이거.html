@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신곡 — DIVINA COMMEDIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Noto+Sans+KR:wght@300;400;500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --dark: #0f0d0b;
+    --burgundy: #6b1a1a;
+    --burgundy-light: #8b2222;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f30;
+    --cream: #f0e6d0;
+    --grey: #555;
+    --grey-light: #888;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--black);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  /* ─── PAGES ─── */
+  .page { position: fixed; inset: 0; transition: opacity 0.8s ease; }
+  .page.hidden { opacity: 0; pointer-events: none; }
+
+  /* ─── HOME: SPLIT ─── */
+  #home {
+    display: flex;
+    width: 100%; height: 100%;
+  }
+
+  .split {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: flex 0.7s cubic-bezier(0.77,0,0.175,1);
+  }
+  #home:hover .split { flex: 0.6; }
+  #home .split:hover { flex: 1.6; }
+
+  .split-bg {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.9s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.7s ease;
+    filter: brightness(0.35) saturate(0.6);
+  }
+  .split:hover .split-bg {
+    transform: scale(1.04);
+    filter: brightness(0.5) saturate(0.8);
+  }
+
+  /* Botticelli inferno map — left */
+  #left .split-bg {
+    background-image:
+      radial-gradient(ellipse at 50% 80%, rgba(139,34,34,0.5) 0%, transparent 60%),
+      url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Sandro_Botticelli_-_La_carte_de_l%27Enfer.jpg/1280px-Sandro_Botticelli_-_La_carte_de_l%27Enfer.jpg');
+  }
+
+  /* Doré dark forest — right */
+  #right .split-bg {
+    background-image:
+      radial-gradient(ellipse at 50% 30%, rgba(20,30,60,0.6) 0%, transparent 60%),
+      url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Gustave_Dore_Inferno1.jpg/800px-Gustave_Dore_Inferno1.jpg');
+  }
+
+  .split-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .split-tag {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 5px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    transition: color 0.4s;
+  }
+  .split:hover .split-tag { color: var(--gold); }
+
+  .split-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -1px;
+    color: var(--cream);
+    transition: color 0.4s, text-shadow 0.4s;
+  }
+  .split:hover .split-title {
+    color: #fff;
+    text-shadow: 0 0 60px rgba(201,168,76,0.3);
+  }
+
+  .split-sub {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: clamp(12px, 1.4vw, 16px);
+    color: var(--grey-light);
+    max-width: 240px;
+    line-height: 1.7;
+    transition: color 0.4s;
+  }
+  .split:hover .split-sub { color: var(--cream); }
+
+  .split-arrow {
+    margin-top: 8px;
+    width: 40px; height: 1px;
+    background: var(--gold-dim);
+    position: relative;
+    transition: width 0.4s, background 0.4s;
+  }
+  .split-arrow::after {
+    content: '';
+    position: absolute; right: 0; top: -3px;
+    width: 7px; height: 7px;
+    border-right: 1px solid var(--gold-dim);
+    border-top: 1px solid var(--gold-dim);
+    transform: rotate(45deg);
+    transition: border-color 0.4s;
+  }
+  .split:hover .split-arrow { width: 60px; background: var(--gold); }
+  .split:hover .split-arrow::after { border-color: var(--gold); }
+
+  .divider {
+    position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold-dim) 20%, var(--gold-dim) 80%, transparent);
+    z-index: 10;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  #home:hover .divider { opacity: 0.4; }
+
+  /* top title */
+  .home-header {
+    position: absolute; top: 0; left: 0; right: 0;
+    z-index: 20;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 40px;
+    pointer-events: none;
+  }
+  .home-header-title {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+  .home-header-hint {
+    margin-top: 6px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--grey);
+  }
+
+  /* bottom credit */
+  .home-footer {
+    position: absolute; bottom: 32px; left: 0; right: 0;
+    z-index: 20;
+    text-align: center;
+    pointer-events: none;
+  }
+  .home-footer span {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--grey);
+    text-transform: uppercase;
+  }
+
+  /* ─── INNER PAGES ─── */
+  #archive, #pieces {
+    background: var(--dark);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* back button */
+  .back-btn {
+    position: fixed; top: 32px; left: 40px;
+    z-index: 100;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--grey-light);
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none; background: none;
+    transition: color 0.3s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .back-btn::before {
+    content: '←';
+    font-size: 14px;
+    transition: transform 0.3s;
+  }
+  .back-btn:hover { color: var(--gold); }
+  .back-btn:hover::before { transform: translateX(-4px); }
+
+  /* ─── ARCHIVE PAGE ─── */
+  .archive-hero {
+    height: 100vh;
+    position: relative;
+    display: flex; align-items: flex-end;
+    padding: 80px;
+    overflow: hidden;
+  }
+  .archive-hero-bg {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to top, var(--dark) 0%, transparent 50%),
+      linear-gradient(to right, var(--dark) 0%, transparent 40%),
+      url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Sandro_Botticelli_-_La_carte_de_l%27Enfer.jpg/1280px-Sandro_Botticelli_-_La_carte_de_l%27Enfer.jpg');
+    background-size: cover;
+    background-position: center right;
+    filter: brightness(0.3) saturate(0.5);
+  }
+  .archive-hero-content { position: relative; z-index: 2; max-width: 600px; }
+  .archive-hero-label {
+    font-size: 10px; letter-spacing: 6px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .archive-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 900; line-height: 1;
+    margin-bottom: 24px;
+  }
+  .archive-hero-desc {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 17px; line-height: 1.8;
+    color: var(--grey-light);
+    max-width: 440px;
+  }
+
+  /* book info strip */
+  .book-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid #1e1e1e;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .book-strip-item {
+    padding: 32px 40px;
+    border-right: 1px solid #1e1e1e;
+  }
+  .book-strip-item:last-child { border-right: none; }
+  .strip-label {
+    font-size: 9px; letter-spacing: 4px;
+    color: var(--gold-dim); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .strip-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; color: var(--cream);
+  }
+
+  /* story section */
+  .story-section {
+    padding: 100px 80px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+  .story-label {
+    font-size: 9px; letter-spacing: 5px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .story-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px; font-weight: 700; line-height: 1.2;
+    margin-bottom: 24px;
+  }
+  .story-body {
+    font-size: 15px; line-height: 2;
+    color: var(--grey-light);
+  }
+  .story-img {
+    width: 100%; aspect-ratio: 3/4;
+    object-fit: cover;
+    filter: grayscale(80%) brightness(0.7);
+    transition: filter 0.5s;
+  }
+  .story-img:hover { filter: grayscale(40%) brightness(0.9); }
+
+  /* categories */
+  .cat-section { padding: 80px; }
+  .cat-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px; letter-spacing: 6px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 48px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .cat-section-title::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(to right, #2a2a2a, transparent);
+  }
+
+  .cat-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid #1e1e1e;
+    margin-bottom: 48px;
+  }
+  .cat-tab {
+    padding: 14px 28px;
+    font-size: 10px; letter-spacing: 4px;
+    color: var(--grey); text-transform: uppercase;
+    cursor: pointer; border: none; background: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+    margin-bottom: -1px;
+  }
+  .cat-tab.active, .cat-tab:hover {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  .cat-grid { display: none; }
+  .cat-grid.active {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    background: #1a1a1a;
+  }
+
+  .work-card {
+    background: var(--dark);
+    padding: 36px;
+    transition: background 0.3s;
+    cursor: default;
+  }
+  .work-card:hover { background: #141210; }
+  .work-card-num {
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--gold-dim); margin-bottom: 16px;
+  }
+  .work-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; font-weight: 700;
+    margin-bottom: 8px; line-height: 1.3;
+  }
+  .work-card-creator {
+    font-size: 11px; letter-spacing: 2px;
+    color: var(--grey-light); margin-bottom: 14px;
+  }
+  .work-card-desc {
+    font-size: 13px; line-height: 1.8;
+    color: var(--grey); border-top: 1px solid #1e1e1e;
+    padding-top: 14px;
+  }
+
+  /* quote */
+  .quote-section {
+    padding: 120px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .quote-section::before {
+    content: '"';
+    position: absolute; top: -40px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 300px; line-height: 1;
+    color: rgba(201,168,76,0.04);
+    pointer-events: none;
+  }
+  .quote-text {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: clamp(22px, 3vw, 36px);
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto 24px;
+    color: var(--cream);
+  }
+  .quote-source {
+    font-size: 10px; letter-spacing: 5px;
+    color: var(--gold); text-transform: uppercase;
+  }
+
+  /* ─── PIECES PAGE ─── */
+  .pieces-hero {
+    height: 100vh;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  .pieces-hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 100%, rgba(10,15,30,0.9) 0%, transparent 60%),
+      linear-gradient(to bottom, var(--dark) 0%, transparent 30%, var(--dark) 100%),
+      url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Gustave_Dore_Inferno1.jpg/800px-Gustave_Dore_Inferno1.jpg');
+    background-size: cover;
+    background-position: center top;
+    filter: brightness(0.25) saturate(0.3) hue-rotate(200deg);
+  }
+  .pieces-hero-content { position: relative; z-index: 2; }
+  .spoiler-warning {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px;
+    border: 1px solid var(--burgundy);
+    font-size: 10px; letter-spacing: 4px;
+    color: var(--burgundy-light); text-transform: uppercase;
+    margin-bottom: 32px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .pieces-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 7vw, 90px);
+    font-weight: 900; line-height: 0.9;
+    margin-bottom: 24px;
+  }
+  .pieces-hero-sub {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 18px; color: var(--grey-light);
+  }
+
+  /* TMI cards */
+  .tmi-section { padding: 80px; }
+  .tmi-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px; letter-spacing: 6px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 60px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .tmi-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, #2a2a2a, transparent);
+  }
+
+  .tmi-list { display: flex; flex-direction: column; gap: 1px; background: #1a1a1a; }
+  .tmi-item {
+    background: var(--dark);
+    display: grid; grid-template-columns: 80px 1fr;
+    align-items: start;
+    padding: 40px;
+    transition: background 0.3s;
+  }
+  .tmi-item:hover { background: #130f0d; }
+  .tmi-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px; font-weight: 900;
+    color: #1e1a16; line-height: 1;
+    user-select: none;
+  }
+  .tmi-content { padding-left: 20px; }
+  .tmi-content-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 700;
+    margin-bottom: 10px; color: var(--cream);
+  }
+  .tmi-content-body {
+    font-size: 14px; line-height: 1.9;
+    color: var(--grey-light);
+  }
+  .tmi-spoiler {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 10px;
+    font-size: 9px; letter-spacing: 3px;
+    color: var(--burgundy-light);
+    border: 1px solid var(--burgundy);
+    text-transform: uppercase;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 120px 80px;
+    text-align: center;
+    border-top: 1px solid #1a1a1a;
+  }
+  .cta-label {
+    font-size: 10px; letter-spacing: 5px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 900; margin-bottom: 16px;
+  }
+  .cta-sub {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 18px; color: var(--grey-light);
+    margin-bottom: 48px;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 16px 48px;
+    border: 1px solid var(--gold);
+    font-size: 11px; letter-spacing: 5px;
+    color: var(--gold); text-transform: uppercase;
+    text-decoration: none; cursor: pointer;
+    background: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  .cta-btn:hover { background: var(--gold); color: var(--black); }
+
+  /* scroll reveal */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HOME ═══════════ -->
+<div id="home" class="page">
+  <div class="home-header">
+    <div class="home-header-title">DIVINA COMMEDIA</div>
+    <div class="home-header-hint">어느 쪽을 선택하시겠습니까</div>
+  </div>
+
+  <div class="split" id="left" onclick="goTo('archive')">
+    <div class="split-bg"></div>
+    <div class="split-overlay">
+      <div class="split-tag">보티첼리 · 지옥의 설계도</div>
+      <div class="split-title">ARCHIVE</div>
+      <div class="split-sub">단테와 신곡, 그리고 700년간 이어진 영감의 기록</div>
+      <div class="split-arrow"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="split" id="right" onclick="goTo('pieces')">
+    <div class="split-bg"></div>
+    <div class="split-overlay">
+      <div class="split-tag">도레 · 어두운 숲</div>
+      <div class="split-title">PIECES</div>
+      <div class="split-sub">당신이 몰랐던 신곡의 조각들<br>⚠ 스포 포함</div>
+      <div class="split-arrow"></div>
+    </div>
+  </div>
+
+  <div class="home-footer">
+    <span>단테 알리기에리 · 1320</span>
+  </div>
+</div>
+
+<!-- ═══════════ ARCHIVE ═══════════ -->
+<div id="archive" class="page hidden">
+  <button class="back-btn" onclick="goTo('home')">돌아가기</button>
+
+  <!-- Hero -->
+  <div class="archive-hero">
+    <div class="archive-hero-bg"></div>
+    <div class="archive-hero-content">
+      <div class="archive-hero-label">Archive — 아카이브</div>
+      <h1 class="archive-hero-title">신곡<br><em style="font-family:'IM Fell English',serif;font-style:italic;font-size:0.55em;color:var(--gold)">Divina Commedia</em></h1>
+      <p class="archive-hero-desc">인간이 길을 잃는 순간, 여정이 시작된다.<br>14세기에 씌어졌으나 지금도 살아있는 책.</p>
+    </div>
+  </div>
+
+  <!-- Book info -->
+  <div class="book-strip reveal">
+    <div class="book-strip-item">
+      <div class="strip-label">저자</div>
+      <div class="strip-value">단테 알리기에리</div>
+    </div>
+    <div class="book-strip-item">
+      <div class="strip-label">완성</div>
+      <div class="strip-value">1320년</div>
+    </div>
+    <div class="book-strip-item">
+      <div class="strip-label">구성</div>
+      <div class="strip-value">총 100곡 · 3편</div>
+    </div>
+    <div class="book-strip-item">
+      <div class="strip-label">장르</div>
+      <div class="strip-value">서사시 · 판타지 · 신학</div>
+    </div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-section reveal">
+    <div>
+      <div class="story-label">이 책에 대하여</div>
+      <h2 class="story-title">길을 잃은 자의<br>위대한 여정</h2>
+      <p class="story-body">
+        단테는 35세, 인생의 정중앙에서 어두운 숲 속에 길을 잃는다.<br><br>
+        로마 시인 베르길리우스의 안내로 지옥과 연옥을 지나,
+        연인 베아트리체의 인도로 천국에 이르는 여정.
+        신곡은 단순한 사후 세계 이야기가 아니다.<br><br>
+        이 책은 지금을 살아가는 모든 인간에게 묻는다.<br>
+        <em style="color:var(--cream)">"당신은 지금 올바른 길 위에 있는가?"</em>
+      </p>
+    </div>
+    <img
+      class="story-img"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Dante_Alighieri_by_Andrea_del_Castagno.jpg/400px-Dante_Alighieri_by_Andrea_del_Castagno.jpg"
+      alt="단테 초상"
+    />
+  </div>
+
+  <!-- Works -->
+  <div class="cat-section reveal">
+    <div class="cat-section-title">신곡에서 영감받은 작품들</div>
+
+    <div class="cat-tabs">
+      <button class="cat-tab active" onclick="switchTab('art',this)">🎨 미술</button>
+      <button class="cat-tab" onclick="switchTab('game',this)">🎮 게임</button>
+      <button class="cat-tab" onclick="switchTab('film',this)">🎬 영화</button>
+      <button class="cat-tab" onclick="switchTab('music',this)">🎵 음악</button>
+      <button class="cat-tab" onclick="switchTab('lit',this)">📚 문학</button>
+    </div>
+
+    <div id="tab-art" class="cat-grid active">
+      <div class="work-card">
+        <div class="work-card-num">01</div>
+        <div class="work-card-title">지옥의 지도</div>
+        <div class="work-card-creator">Sandro Botticelli · 1480s</div>
+        <div class="work-card-desc">신곡 전편을 위해 그린 92점의 삽화. 보티첼리는 지옥의 구조를 정밀한 도해로 시각화했다.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">02</div>
+        <div class="work-card-title">신곡 판화집</div>
+        <div class="work-card-creator">Gustave Doré · 1861</div>
+        <div class="work-card-desc">135점의 목판 판화. 지옥의 어둠과 천국의 빛을 극적인 명암으로 표현한 역대 최고의 삽화로 평가받는다.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">03</div>
+        <div class="work-card-title">신곡 삽화</div>
+        <div class="work-card-creator">William Blake · 1824</div>
+        <div class="work-card-desc">죽기 전까지 완성하지 못한 102점. 블레이크 특유의 신비롭고 인체 중심적인 화풍으로 재해석되었다.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">04</div>
+        <div class="work-card-title">신곡 삽화 100점</div>
+        <div class="work-card-creator">Salvador Dalí · 1951–1964</div>
+        <div class="work-card-desc">초현실주의 화풍으로 재해석한 100점의 수채화. 각 캔토마다 하나의 작품을 남겼다.</div>
+      </div>
+    </div>
+
+    <div id="tab-game" class="cat-grid">
+      <div class="work-card">
+        <div class="work-card-num">01</div>
+        <div class="work-card-title">Dante's Inferno</div>
+        <div class="work-card-creator">EA / Visceral Games · 2010</div>
+        <div class="work-card-desc">지옥편을 액션 게임으로 직접 오마주. 9개의 지옥 원을 직접 전투하며 내려가는 구조.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">02</div>
+        <div class="work-card-title">Hades</div>
+        <div class="work-card-creator">Supergiant Games · 2020</div>
+        <div class="work-card-desc">그리스 신화 기반이지만 신곡의 계층적 지옥 구조와 탈출 서사에서 직접적인 영향을 받았다.</div>
+      </div>
+    </div>
+
+    <div id="tab-film" class="cat-grid">
+      <div class="work-card">
+        <div class="work-card-num">01</div>
+        <div class="work-card-title">Se7en</div>
+        <div class="work-card-creator">David Fincher · 1995</div>
+        <div class="work-card-desc">7대 죄악을 살인의 동기로 삼는 구조는 신곡의 죄악 분류 체계에서 직접 유래했다.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">02</div>
+        <div class="work-card-title">인페르노</div>
+        <div class="work-card-creator">Ron Howard · 2016</div>
+        <div class="work-card-desc">댄 브라운 소설 원작. 단테의 신곡과 인류 멸망 음모를 연결하는 스릴러.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">03</div>
+        <div class="work-card-title">What Dreams May Come</div>
+        <div class="work-card-creator">Vincent Ward · 1998</div>
+        <div class="work-card-desc">사후 세계의 시각화에서 신곡의 지옥·천국 묘사를 직접적으로 차용했다.</div>
+      </div>
+    </div>
+
+    <div id="tab-music" class="cat-grid">
+      <div class="work-card">
+        <div class="work-card-num">01</div>
+        <div class="work-card-title">Dante Symphony</div>
+        <div class="work-card-creator">Franz Liszt · 1857</div>
+        <div class="work-card-desc">지옥과 연옥 두 악장으로 구성. 신곡을 음악으로 번역한 최초이자 가장 유명한 시도.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">02</div>
+        <div class="work-card-title">Inferno (가사 오마주)</div>
+        <div class="work-card-creator">Jay-Z, Kanye West 외</div>
+        <div class="work-card-desc">현대 힙합 가사에서 Inferno와 지옥 계층 개념은 가장 빈번하게 오마주되는 문학적 레퍼런스 중 하나.</div>
+      </div>
+    </div>
+
+    <div id="tab-lit" class="cat-grid">
+      <div class="work-card">
+        <div class="work-card-num">01</div>
+        <div class="work-card-title">황무지 (The Waste Land)</div>
+        <div class="work-card-creator">T.S. Eliot · 1922</div>
+        <div class="work-card-desc">신곡에서 직접 인용한 구절이 다수 포함. 엘리엇은 단테를 20세기 가장 중요한 시인으로 꼽았다.</div>
+      </div>
+      <div class="work-card">
+        <div class="work-card-num">02</div>
+        <div class="work-card-title">율리시스 (Ulysses)</div>
+        <div class="work-card-creator">James Joyce · 1922</div>
+        <div class="work-card-desc">신곡의 구조와 서술 방식이 조이스의 의식의 흐름 기법 발전에 직접적인 영향을 미쳤다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote -->
+  <div class="quote-section reveal">
+    <p class="quote-text">"인생 여정의 중간에서, 나는 올바른 길을 잃어버리고 어두운 숲 속에서 정신을 차렸다."</p>
+    <div class="quote-source">Inferno · Canto I · Dante Alighieri</div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section reveal">
+    <div class="cta-label">지금 읽을 수 있습니다</div>
+    <h2 class="cta-title">당신의 여정을<br>시작할 준비가 되었나요?</h2>
+    <p class="cta-sub">700년간 읽혀온 질문이 당신을 기다립니다</p>
+    <a href="https://www.yes24.com/product/goods/2049" target="_blank" class="cta-btn">책 구매하기</a>
+  </div>
+</div>
+
+<!-- ═══════════ PIECES ═══════════ -->
+<div id="pieces" class="page hidden">
+  <button class="back-btn" onclick="goTo('home')">돌아가기</button>
+
+  <div class="pieces-hero">
+    <div class="pieces-hero-bg"></div>
+    <div class="pieces-hero-content">
+      <div class="spoiler-warning">⚠ 스포일러 포함</div>
+      <h1 class="pieces-hero-title">신곡의<br>조각들</h1>
+      <p class="pieces-hero-sub">당신이 몰랐던 7가지 사실</p>
+    </div>
+  </div>
+
+  <div class="tmi-section reveal">
+    <div class="tmi-title">TMI — 알고 읽으면 더 재밌는 것들</div>
+    <div class="tmi-list">
+
+      <div class="tmi-item">
+        <div class="tmi-num">01</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+      <div class="tmi-item">
+        <div class="tmi-num">02</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+      <div class="tmi-item">
+        <div class="tmi-num">03</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+      <div class="tmi-item">
+        <div class="tmi-num">04</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+      <div class="tmi-item">
+        <div class="tmi-num">05</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+      <div class="tmi-item">
+        <div class="tmi-num">06</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+      <div class="tmi-item">
+        <div class="tmi-num">07</div>
+        <div class="tmi-content">
+          <div class="tmi-content-title">후에 추가할 예정임</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="cta-section reveal">
+    <div class="cta-label">아카이브도 확인해보세요</div>
+    <h2 class="cta-title">신곡이 남긴<br>700년의 흔적</h2>
+    <p class="cta-sub">미술, 게임, 영화, 음악, 문학 — 신곡의 영향은 지금도 계속된다</p>
+    <button class="cta-btn" onclick="goTo('archive')">아카이브 보기</button>
+  </div>
+</div>
+
+<script>
+  function goTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    document.getElementById(page).classList.remove('hidden');
+    if (page !== 'home') {
+      document.getElementById(page).scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => initReveal(document.getElementById(page)), 100);
+    }
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.cat-grid').forEach(g => g.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  function initReveal(container) {
+    const els = container.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    els.forEach(el => obs.observe(el));
+  }
+</script>
+</body>
+</html>
